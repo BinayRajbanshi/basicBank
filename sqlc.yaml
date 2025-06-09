@@ -1,0 +1,14 @@
+version: "2"
+sql:
+  - engine: "postgresql" # Database engine (PostgreSQL)
+    queries: "./db/query/"   # Path to SQL query files
+    schema: "./db/migration/"   # Path to schema/migration files
+    gen:
+      go:
+        package: "sqlc" # Go package name
+        out: "sqlc" # Output directory
+        sql_package: "pgx/v5"  # PostgreSQL driver (pgx v5)
+        emit_json_tags: true  # Add JSON tags to structs
+        emit_exact_table_names: false   # Singularize struct names (e.g., Users in DB table name → User in struct) 
+        emit_interface: false  # Don't generate Queries interface
+        emit_prepared_queries: false   # If true, generates methods that prepare statements for better performance.
