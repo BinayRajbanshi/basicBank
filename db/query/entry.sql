@@ -6,7 +6,7 @@ WHERE id = $1 LIMIT 1;
 SELECT * FROM entries
 ORDER BY id;
 
--- name: CreateEntries :one
+-- name: CreateEntry :one
 INSERT INTO entries (
   account_id, amount
 ) VALUES (

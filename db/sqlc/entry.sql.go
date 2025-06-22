@@ -3,13 +3,13 @@
 //   sqlc v1.29.0
 // source: entry.sql
 
-package sqlc
+package db
 
 import (
 	"context"
 )
 
-const createEntries = `-- name: CreateEntries :one
+const createEntry = `-- name: CreateEntry :one
 INSERT INTO entries (
   account_id, amount
 ) VALUES (
@@ -18,13 +18,13 @@ INSERT INTO entries (
 RETURNING id, account_id, amount, created_at
 `
 
-type CreateEntriesParams struct {
+type CreateEntryParams struct {
 	AccountID int64 `json:"account_id"`
 	Amount    int64 `json:"amount"`
 }
 
-func (q *Queries) CreateEntries(ctx context.Context, arg CreateEntriesParams) (Entry, error) {
-	row := q.db.QueryRow(ctx, createEntries, arg.AccountID, arg.Amount)
+func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry, error) {
+	row := q.db.QueryRow(ctx, createEntry, arg.AccountID, arg.Amount)
 	var i Entry
 	err := row.Scan(
 		&i.ID,
@@ -74,7 +74,7 @@ func (q *Queries) ListEntries(ctx context.Context) ([]Entry, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Entry
+	items := []Entry{}
 	for rows.Next() {
 		var i Entry
 		if err := rows.Scan(
