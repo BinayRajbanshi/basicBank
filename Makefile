@@ -16,6 +16,9 @@ migratedown:
 sqlc:
 	sqlc generate
 
+test:
+	go test -v -cover ./...
+
 .PHONY: createdb postgres migrateup migratedown dropdb sqlc#In a Makefile, the .PHONY declaration is used to mark targets as phony, meaning they are not actual files, but rather commands or actions that should always be executed when called.
 
  
