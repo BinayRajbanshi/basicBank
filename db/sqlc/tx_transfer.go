@@ -10,7 +10,7 @@ type TransferTxParams struct {
 
 type TransferTxResult struct {
 	Transfer    Transfer `json:"transfer"`
-	FromAccount Account  `json:"from_acccount"`
+	FromAccount Account  `json:"from_account"`
 	ToAccount   Account  `json:"to_account"`
 	FromEntry   Entry    `json:"from_entry"`
 	ToEntry     Entry    `json:"to_entry"`
@@ -22,6 +22,7 @@ type TransferTxResult struct {
 func (store *SQLStore) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
 	var result TransferTxResult
 
+	// callback function here is accessing the variable "result" that is outside of its scope. Hence it is called closure
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
 
@@ -34,7 +35,6 @@ func (store *SQLStore) TransferTx(ctx context.Context, arg TransferTxParams) (Tr
 		if err != nil {
 			return err
 		}
-
 		// from account money is gone so it is obvious that the amount will be deducted
 		result.FromEntry, err = q.CreateEntry(ctx, CreateEntryParams{
 			AccountID: arg.FromAccountID,
@@ -67,7 +67,10 @@ func (store *SQLStore) TransferTx(ctx context.Context, arg TransferTxParams) (Tr
 	return result, err
 }
 
-func addMoney(ctx context.Context, q *Queries, accountID1 int64, accountID2 int64, amount1 int64, amount2 int64) (account1 Account, account2 Account, err error) {
+func addMoney(
+	ctx context.Context, q *Queries,
+	accountID1 int64, amount1 int64,
+	accountID2 int64, amount2 int64) (account1 Account, account2 Account, err error) {
 	account1, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
 		ID:     accountID1,
 		Amount: amount1,
