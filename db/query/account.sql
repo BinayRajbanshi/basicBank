@@ -15,7 +15,8 @@ WHERE id = $1 LIMIT 1;
 -- name: GetAccountForUpdate :one
 SELECT * FROM accounts
 WHERE id = $1 LIMIT 1
-FOR UPDATE;
+FOR NO KEY UPDATE;   
+-- what is the reason for no key. I'll have to recheck
 
 -- name: ListAccounts :many
 SELECT * FROM accounts
