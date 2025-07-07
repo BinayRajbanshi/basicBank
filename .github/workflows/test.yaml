@@ -19,7 +19,7 @@ jobs:
           POSTGRES_PASSWORD: secret
           POSTGRES_DB: basic_bank
         ports:
-          - 5432:5432
+          - 5433:5432
         # set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
