@@ -6,12 +6,18 @@ import (
 
 	"github.com/BinayRajbanshi/GoBasicBank/api"
 	db "github.com/BinayRajbanshi/GoBasicBank/db/sqlc"
+	"github.com/BinayRajbanshi/GoBasicBank/util"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func main() {
-	serverAddress := "0.0.0.0:8080"
-	connPool, err := pgxpool.New(context.Background(), "postgresql://root:secret@localhost:5433/basic_bank?sslmode=disable")
+
+	config, err := util.LoadConfig(".")
+	if err != nil {
+		log.Fatal("cannot load config")
+	}
+	serverAddress := config.ServerAddress
+	connPool, err := pgxpool.New(context.Background(), config.DBSource)
 
 	if err != nil {
 		log.Fatal("cannot connect to the db: ", err)

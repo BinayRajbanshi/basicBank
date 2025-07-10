@@ -6,13 +6,18 @@ import (
 	"os"
 	"testing"
 
+	"github.com/BinayRajbanshi/GoBasicBank/util"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var testStore Store
 
 func TestMain(m *testing.M) {
-	connPool, err := pgxpool.New(context.Background(), "postgresql://root:secret@localhost:5433/basic_bank?sslmode=disable")
+	config, err := util.LoadConfig("../../")
+	if err != nil {
+		log.Fatal("cannot load the config")
+	}
+	connPool, err := pgxpool.New(context.Background(), config.DBSource)
 
 	if err != nil {
 		log.Fatal("cannot connect to the db: ", err)
