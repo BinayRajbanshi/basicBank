@@ -17,6 +17,8 @@ func NewServer(store db.Store) *Server {
 
 	// routes
 	server.router.POST("/api/v1/accounts", server.createAccount)
+	server.router.GET("/api/v1/accounts/:id", server.getAccount)
+	server.router.GET("/api/v1/accounts", server.getAccounts)
 
 	return server
 }
