@@ -5,13 +5,14 @@ import (
 	"net/http"
 
 	db "github.com/BinayRajbanshi/GoBasicBank/db/sqlc"
+	"github.com/BinayRajbanshi/GoBasicBank/util"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
 )
 
 type createAccountRequest struct {
 	Owner    string `json:"owner" binding:"required"`
-	Currency string `json:"currency" binding:"required,currency`
+	Currency string `json:"currency" binding:"required,currency"`
 }
 
 func (server *Server) createAccount(ctx *gin.Context) {
@@ -30,6 +31,13 @@ func (server *Server) createAccount(ctx *gin.Context) {
 	account, err := server.store.CreateAccount(ctx, arg)
 
 	if err != nil {
+		// check what type of error I am getting from the database so that internal server error is not thrown randomly and appropriate status is thrown
+		errCode := util.ErrorCode(err)
+		if errCode == util.ForeignKeyViolation || errCode == util.UniqueViolation {
+			ctx.JSON(http.StatusForbidden, errorResponse(err))
+			return
+		}
+		util.ErrorCode(err)
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
