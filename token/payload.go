@@ -43,7 +43,7 @@ func (payload *Payload) Valid() error {
 	return nil
 }
 
-// JWT v5 Claims interface methods
+// JWT v5 Claims interface methods. this approach is more cleaner
 func (payload *Payload) GetExpirationTime() (*jwt.NumericDate, error) {
 	return jwt.NewNumericDate(payload.ExpiredAt), nil
 }
