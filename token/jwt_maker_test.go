@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/BinayRajbanshi/GoBasicBank/util"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/require"
 )
 
@@ -47,4 +48,24 @@ func TestExpiredJWTToken(t *testing.T) {
 	require.Nil(t, payload)
 }
 
-// func TestInvalidToken
+// TestInvalidJWTTokenAlgNone ensures that the JWT verification logic
+// correctly rejects tokens signed with the "none" algorithm (i.e., unsigned tokens).
+// This test helps prevent a critical security vulnerability where accepting such tokens
+// could allow attackers to bypass authentication.
+func TestInvalidJWTTokenAlgNone(t *testing.T) {
+	payload, err := NewPayload(util.RandOwner(), time.Minute)
+	require.NoError(t, err)
+
+	jwtToken := jwt.NewWithClaims(jwt.SigningMethodNone, payload)
+	// UnsafeAllowNoneSignatureType should be only used in test and not in production
+	token, err := jwtToken.SignedString(jwt.UnsafeAllowNoneSignatureType)
+	require.NoError(t, err)
+
+	maker, err := NewJWTMaker(util.RandomString(32))
+	require.NoError(t, err)
+
+	payload, err = maker.VerifyToken(token)
+	require.Error(t, err) // need error here
+	require.EqualError(t, err, ErrInvalidToken.Error())
+	require.Nil(t, payload)
+}
