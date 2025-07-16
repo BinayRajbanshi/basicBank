@@ -10,10 +10,12 @@ import (
 
 const minSecretKeySize = 32
 
+// jwt token maker
 type JWTMaker struct {
 	secretKey string
 }
 
+// initializes jwt token maker
 func NewJWTMaker(secretKey string) (Maker, error) {
 	if len(secretKey) < minSecretKeySize {
 		return nil, fmt.Errorf("invalid key size: must be of at least %d characters", minSecretKeySize)
