@@ -1,12 +1,12 @@
 package api
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
 
 	db "github.com/BinayRajbanshi/GoBasicBank/db/sqlc"
+	"github.com/BinayRajbanshi/GoBasicBank/util"
 	"github.com/gin-gonic/gin"
 )
 
@@ -51,7 +51,7 @@ func (server *Server) createTransfer(ctx *gin.Context) {
 func (server *Server) validAccount(ctx *gin.Context, accountID int64, currency string) bool {
 	account, err := server.store.GetAccount(ctx, accountID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, util.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return false
 		}

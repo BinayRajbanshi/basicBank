@@ -7,7 +7,6 @@ import (
 	db "github.com/BinayRajbanshi/GoBasicBank/db/sqlc"
 	"github.com/BinayRajbanshi/GoBasicBank/util"
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5"
 )
 
 type createAccountRequest struct {
@@ -59,7 +58,7 @@ func (server *Server) getAccount(ctx *gin.Context) {
 	account, err := server.store.GetAccount(ctx, req.ID)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		if errors.Is(err, util.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -90,7 +89,7 @@ func (server *Server) getAccounts(ctx *gin.Context) {
 	accounts, err := server.store.ListAccounts(ctx, params)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		if errors.Is(err, util.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}

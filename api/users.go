@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
@@ -19,9 +20,19 @@ type createUserRequest struct {
 type UserPublicResponse struct {
 	Username          string    `json:"username" binding:"required,alphanum"`
 	Email             string    `json:"email" binding:"required,email"`
-	Fullname          string    `json:"full_name" binding:"required"`
+	FullName          string    `json:"full_name" binding:"required"`
 	CreatedAt         time.Time `json:"created_at" binding:"required"`
 	PasswordChangedAt time.Time `json:"password_changed_at" binding:"required"`
+}
+
+func newUserPublicResponse(user db.User) UserPublicResponse {
+	return UserPublicResponse{
+		Username:          user.Username,
+		FullName:          user.FullName,
+		Email:             user.Email,
+		PasswordChangedAt: user.PasswordChangedAt,
+		CreatedAt:         user.CreatedAt,
+	}
 }
 
 func (server *Server) createUser(ctx *gin.Context) {
@@ -56,13 +67,62 @@ func (server *Server) createUser(ctx *gin.Context) {
 		return
 	}
 
-	response := UserPublicResponse{
-		Username:          user.Username,
-		Email:             user.Email,
-		Fullname:          user.FullName,
-		CreatedAt:         user.CreatedAt,
-		PasswordChangedAt: user.PasswordChangedAt,
-	}
+	response := newUserPublicResponse(user)
 	ctx.JSON(http.StatusOK, response)
 
+}
+
+type loginUserRequest struct {
+	Username string `json:"username" binding:"required,alphanum"`
+	Password string `json:"password" binding:"required,min=6"`
+}
+
+type loginUserResponse struct {
+	AccessToken          string             `json:"access_token"`
+	AccessTokenExpiresAt string             `json:"token_expires_at"`
+	User                 UserPublicResponse `json:"user"`
+}
+
+func (server *Server) loginUser(ctx *gin.Context) {
+	var req loginUserRequest
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	// check if the user exixts
+	user, err := server.store.GetUser(ctx, req.Username)
+	if err != nil {
+		if errors.Is(err, util.ErrRecordNotFound) {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	// check if the entered password is correct
+	err = util.CheckPassword(req.Password, user.HashedPassword)
+
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
+	accessToken, err := server.tokenMaker.CreateToken(
+		user.Username,
+		server.config.AccessTokenDuration,
+	)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	response := loginUserResponse{
+		AccessToken: accessToken,
+		User:        newUserPublicResponse(user),
+	}
+
+	ctx.JSON(http.StatusOK, response)
 }

@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"testing"
 	"time"
@@ -80,7 +79,7 @@ func TestDeleteAccount(t *testing.T) {
 	// get the account after deleting to confirm that it is actually deleted
 	account2, err := testStore.GetAccount(context.Background(), account1.ID)
 	require.Error(t, err)
-	require.True(t, errors.Is(err, sql.ErrNoRows), "error should be sql.ErrNoRows")
+	require.True(t, errors.Is(err, util.ErrRecordNotFound), "error should be sql.ErrNoRows")
 	require.Empty(t, account2)
 }
 

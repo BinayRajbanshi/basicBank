@@ -1,7 +1,11 @@
 package api
 
 import (
+	"fmt"
+
 	db "github.com/BinayRajbanshi/GoBasicBank/db/sqlc"
+	"github.com/BinayRajbanshi/GoBasicBank/token"
+	"github.com/BinayRajbanshi/GoBasicBank/util"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
@@ -9,13 +13,19 @@ import (
 
 // server serves HTTP request for our application
 type Server struct {
-	store  db.Store
-	router *gin.Engine
+	store      db.Store
+	tokenMaker token.Maker
+	router     *gin.Engine
+	config     util.Config
 }
 
-func NewServer(store db.Store) *Server {
+func NewServer(config util.Config, store db.Store) (*Server, error) {
 	router := gin.Default()
-	server := &Server{store: store, router: router}
+	tokenMaker, err := token.NewJWTMaker(config.TokenSymmetrcKey)
+	if err != nil {
+		return nil, fmt.Errorf("cannot initialize token maker : %w", err)
+	}
+	server := &Server{store: store, tokenMaker: tokenMaker, config: config, router: router}
 
 	// adding custom validator
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
@@ -24,6 +34,7 @@ func NewServer(store db.Store) *Server {
 
 	//user routes
 	server.router.POST("/api/v1/users", server.createUser)
+	server.router.POST("/api/v1/users/login", server.loginUser)
 
 	// account routes
 	server.router.POST("/api/v1/accounts", server.createAccount)
@@ -33,7 +44,7 @@ func NewServer(store db.Store) *Server {
 	// transfer routes
 	server.router.POST("/api/v1/transfers", server.createTransfer)
 
-	return server
+	return server, nil
 }
 
 // start the server
