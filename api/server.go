@@ -37,12 +37,16 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 	server.router.POST("/api/v1/users/login", server.loginUser)
 
 	// account routes
-	server.router.POST("/api/v1/accounts", server.createAccount)
+	// server.router.POST("/api/v1/accounts", server.createAccount)
 	server.router.GET("/api/v1/accounts/:id", server.getAccount)
 	server.router.GET("/api/v1/accounts", server.getAccounts)
 
 	// transfer routes
 	server.router.POST("/api/v1/transfers", server.createTransfer)
+
+	// PROTECTED ROUTES
+	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
+	authRoutes.POST("/api/v1/accounts", server.createAccount)
 
 	return server, nil
 }

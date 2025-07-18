@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	db "github.com/BinayRajbanshi/GoBasicBank/db/sqlc"
+	"github.com/BinayRajbanshi/GoBasicBank/token"
 	"github.com/BinayRajbanshi/GoBasicBank/util"
 	"github.com/gin-gonic/gin"
 )
@@ -21,8 +22,11 @@ func (server *Server) createAccount(ctx *gin.Context) {
 		return
 	}
 
+	// .(*token.Payload) => this is called type assertion.  asserting that the value retrieved from the context is of type *token.Payload
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
 	arg := db.CreateAccountParams{
-		Owner:    req.Owner,
+		Owner:    authPayload.Username,
 		Currency: req.Currency,
 		Balance:  0,
 	}
