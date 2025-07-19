@@ -16,7 +16,9 @@ const (
 	authorizationPayloadKey = "authorization_payload"
 )
 
+// gin.HandlerFunc is just a function that takes in a *gin.Context and does something (like modify it, halt the request, or let it continue. In this case it sets the value of payload).
 func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
+	// returning gin.HandlerFunc as expected by authMiddleware
 	return func(ctx *gin.Context) {
 		authorizationHeader := ctx.GetHeader(authorizationHeaderKey)
 
