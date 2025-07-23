@@ -84,22 +84,24 @@ func TestDeleteAccount(t *testing.T) {
 }
 
 func TestListAccount(t *testing.T) {
+	var lastAccount Account
 	for i := 1; i <= 10; i++ {
-		createRandomAccount(t)
+		lastAccount = createRandomAccount(t)
 	}
 
-	// limit 5 and offset 5 means, skip 5 rows and give next 5 rows
 	arg := ListAccountsParams{
-		Offset: 5,
+		Owner:  lastAccount.Owner,
 		Limit:  5,
+		Offset: 0,
 	}
 
-	// as we create 10 random accounts initially, it is obvious that we will get 5 accounts as a response with offset 5 and limit 5
 	accounts, err := testStore.ListAccounts(context.Background(), arg)
 	require.NoError(t, err)
-	require.Len(t, accounts, 5)
+	require.NotEmpty(t, accounts)
 
 	for _, account := range accounts {
 		require.NotEmpty(t, account)
+		require.Equal(t, lastAccount.Owner, account.Owner)
+
 	}
 }

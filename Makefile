@@ -22,6 +22,9 @@ test:
 server:
 	go run main.go
 
+mock:
+	mockgen -package mockdb -destination db/mock/store.go github.com/BinayRajbanshi/GoBasicBank/db/sqlc Store
+
 #In a Makefile, the .PHONY declaration is used to mark targets as phony, meaning they are not actual files, but rather commands or actions that should always be executed when called.
 .PHONY: createdb postgres migrateup migratedown dropdb sqlc test server 
 
