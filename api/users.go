@@ -38,7 +38,7 @@ func newUserPublicResponse(user db.User) UserPublicResponse {
 func (server *Server) createUser(ctx *gin.Context) {
 	var req createUserRequest
 
-	if err := ctx.ShouldBind(&req); err != nil {
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
