@@ -6,8 +6,10 @@ import (
 	"time"
 
 	db "github.com/BinayRajbanshi/GoBasicBank/db/sqlc"
+	"github.com/BinayRajbanshi/GoBasicBank/token"
 	"github.com/BinayRajbanshi/GoBasicBank/util"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type createUserRequest struct {
@@ -78,9 +80,12 @@ type loginUserRequest struct {
 }
 
 type loginUserResponse struct {
-	AccessToken          string             `json:"access_token"`
-	AccessTokenExpiresAt string             `json:"token_expires_at"`
-	User                 UserPublicResponse `json:"user"`
+	SessionID             uuid.UUID          `json:"session_id"`
+	AccessToken           string             `json:"access_token"`
+	AccessTokenExpiresAt  time.Time          `json:"access_token_expires_at"`
+	RefreshToken          string             `json:"refresh_token"`
+	RefreshTokenExpiresAt time.Time          `json:"refresh_token_expires_at"`
+	User                  UserPublicResponse `json:"user"`
 }
 
 func (server *Server) loginUser(ctx *gin.Context) {
@@ -110,18 +115,47 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		return
 	}
 
-	accessToken, err := server.tokenMaker.CreateToken(
+	accessToken, accessTokenPayload, err := server.tokenMaker.CreateToken(
 		user.Username,
 		server.config.AccessTokenDuration,
+		token.TokenTypeAccessToken,
 	)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
+	refreshToken, refreshTokenPayload, err := server.tokenMaker.CreateToken(
+		user.Username,
+		server.config.RefreshTokenDuration,
+		token.TokenTypeRefreshToken,
+	)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+	}
+
+	session, err := server.store.CreateSession(ctx, db.CreateSessionParams{
+		ID:           refreshTokenPayload.ID,
+		Username:     user.Username,
+		RefreshToken: refreshToken,
+		UserAgent:    ctx.Request.UserAgent(),
+		ClientIp:     ctx.ClientIP(),
+		IsBlocked:    false,
+		ExpiresAt:    refreshTokenPayload.ExpiredAt,
+	})
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+	}
+
 	response := loginUserResponse{
-		AccessToken: accessToken,
-		User:        newUserPublicResponse(user),
+		SessionID:             session.ID,
+		AccessToken:           accessToken,
+		AccessTokenExpiresAt:  accessTokenPayload.ExpiredAt,
+		RefreshToken:          refreshToken,
+		RefreshTokenExpiresAt: refreshTokenPayload.ExpiredAt,
+		User:                  newUserPublicResponse(user),
 	}
 
 	ctx.JSON(http.StatusOK, response)

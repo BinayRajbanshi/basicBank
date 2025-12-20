@@ -21,7 +21,7 @@ type Server struct {
 
 func NewServer(config util.Config, store db.Store) (*Server, error) {
 	router := gin.Default()
-	tokenMaker, err := token.NewJWTMaker(config.TokenSymmetrcKey)
+	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetrcKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot initialize token maker : %w", err)
 	}
@@ -35,6 +35,7 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 	//user routes
 	server.router.POST("/api/v1/users", server.createUser)
 	server.router.POST("/api/v1/users/login", server.loginUser)
+	server.router.POST("/api/v1/refresh-token", server.renewAccessToken)
 
 	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
 

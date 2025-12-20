@@ -29,13 +29,17 @@ func NewPasetoMaker(symmetricKey string) (Maker, error) {
 }
 
 // username and expiry duration is encoded in to a token during creation
-func (maker *PasetoMaker) CreateToken(username string, duration time.Duration) (string, error) {
-	payload, err := NewPayload(username, duration)
+func (maker *PasetoMaker) CreateToken(username string, duration time.Duration, tokenType string) (string, *Payload, error) {
+	payload, err := NewPayload(username, duration, tokenType)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
-	return maker.paseto.Encrypt(maker.symmetricKey, payload, nil)
+	token, err := maker.paseto.Encrypt(maker.symmetricKey, payload, nil)
+	if err != nil {
+		return "", nil, err
+	}
+	return token, payload, err
 }
 
 // verify token will take the token check its validity, and return the paylod
