@@ -50,8 +50,5 @@ docker-compose.*.yml
 tmp/
 *.pid
 
-# Optional: ignore image tarballs or exports
 *.tar
 
-# Optional: if you build the Go binary for the container in the project root
-/myapp

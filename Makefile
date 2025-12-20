@@ -1,11 +1,11 @@
 postgres:
-	docker run --name postgres17 -p 5433:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:17-alpine
+	docker run --name bank_db -p 5433:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:17-alpine
 
 createdb:
-	docker exec -it postgres17 createdb --username=root --owner=root basic_bank
+	docker exec -it bank_db createdb --username=root --owner=root basic_bank
 
 dropdb:
-	docker exec -it postgres17 dropdb basic_bank
+	docker exec -it bank_db dropdb basic_bank
 
 migrateup:
 	 migrate -path db/migration -database "postgresql://root:secret@localhost:5433/basic_bank?sslmode=disable" -verbose up
