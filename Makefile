@@ -25,7 +25,15 @@ server:
 mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/BinayRajbanshi/GoBasicBank/db/sqlc Store
 
+proto:
+# remove all the generated go codes before generating new
+	rm -f pb/*.go
+# generate go code from proto file
+	protoc --proto_path=proto --go_out=pb --go_opt=paths=source_relative \
+    --go-grpc_out=pb --go-grpc_opt=paths=source_relative \
+    proto/*.proto
+
 #In a Makefile, the .PHONY declaration is used to mark targets as phony, meaning they are not actual files, but rather commands or actions that should always be executed when called.
-.PHONY: createdb postgres migrateup migratedown dropdb sqlc test server 
+.PHONY: createdb postgres migrateup migratedown dropdb sqlc test server proto
 
  
