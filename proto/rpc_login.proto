@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package  = "github.com/BinayRajbanshi/GoBasicBank/pb";
+
+import "google/protobuf/timestamp.proto";
+import "user.proto";
+
+
+
+message LoginRequest{
+    string user_name = 1;
+    string password = 2; 
+}
+
+message LoginResponse{
+    string session_id = 1;
+    string access_token = 2;
+    google.protobuf.Timestamp access_token_expires_at = 3;
+    string refresh_toke = 4;
+    google.protobuf.Timestamp refresh_token_expires_at = 5;
+    User user = 6;
+}
+
+	// SessionID             uuid.UUID          `json:"session_id"`
+	// AccessToken           string             `json:"access_token"`
+	// AccessTokenExpiresAt  time.Time          `json:"access_token_expires_at"`
+	// RefreshToken          string             `json:"refresh_token"`
+	// RefreshTokenExpiresAt time.Time          `json:"refresh_token_expires_at"`
+	// User                  UserPublicResponse `json:"user"`

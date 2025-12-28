@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package pb; // package is just the way to group multiple protofiles of same topic together
+
+option go_package = "github.com/BinayRajbanshi/GoBasicBank/pb"; //generated protobuffers will go to pb folder that I created
+
+import "user.proto";
+
+message CreateUserRequest {
+    string username = 1;
+    string email = 2;
+    string password = 3;
+    string full_name = 4; 
+}
+
+message CreateUserResponse {
+    User user = 1;
+
+}

@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package pb; // package is just the way to group multiple protofiles of same topic together
+
+import "rpc_create_user.proto";
+import "rpc_login.proto";
+
+option go_package = "github.com/BinayRajbanshi/GoBasicBank/pb"; //generated protobuffers will go to pb folder that I created
+
+service BasicBank {
+    rpc CreateUser(CreateUserRequest) returns (CreateUserResponse){}
+    rpc Login(LoginRequest) returns (LoginResponse){}
+}

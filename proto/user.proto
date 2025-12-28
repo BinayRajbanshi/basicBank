@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package pb; // package is just the way to group multiple protofiles of same topic together
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/BinayRajbanshi/GoBasicBank/pb"; //generated protobuffers will go to pb folder that I created
+
+message User {
+    string username = 1;
+    string email = 2;
+    string full_name = 3;
+    google.protobuf.Timestamp password_changed_at = 4;
+    google.protobuf.Timestamp created_at = 5;
+}
